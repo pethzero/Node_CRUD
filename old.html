@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="container mt-4" id="app">
+        <h2>Employee List (OLD)</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="employee in employees" :key="employee.id">
+                    <td>{{ employee.id }}</td>
+                    <td>
+                        <!-- Use v-if to conditionally display input or employee name -->
+                        <template v-if="employee.id !== editEmployeeId">
+                            {{ employee.name }}
+                        </template>
+                        <template v-else>
+                            <input v-model="editedEmployeeName" class="form-control" required>
+                        </template>
+                    </td>
+                    <td>
+                        <!-- Use v-if to conditionally display buttons based on editing status -->
+                        <template v-if="employee.id !== editEmployeeId">
+                            <button class="btn btn-warning btn-sm" @click="startEdit(employee.id)">Edit</button>
+                            <button class="btn btn-danger btn-sm" @click="deleteEmployee(employee.id)">Delete</button>
+                        </template>
+                        <template v-else>
+                            <button class="btn btn-success btn-sm" @click="updateEmployee">Update</button>
+                            <button class="btn btn-secondary btn-sm" @click="cancelEdit">Cancel</button>
+                        </template>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Add/Edit Employee</h2>
+        <form @submit.prevent="submitForm">
+            <div class="mb-3">
+                <label for="employeeName" class="form-label">Name</label>
+                <input type="text" class="form-control" v-model="employeeName" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js (required for Bootstrap components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                employees: [],
+                employeeName: '',
+                editEmployeeId: null,
+                editedEmployeeName: '',
+            },
+            mounted() {
+                this.fetchData();
+            },
+            methods: {
+                async fetchData() {
+                    try {
+                        const response = await fetch('http://localhost:3000/api/employees');
+                        this.employees = await response.json();
+                    } catch (error) {
+                        console.error('Error fetching data:', error);
+                    }
+                },
+                async submitForm() {
+                    if (this.employeeName) {
+                        if (this.editEmployeeId !== null) {
+                            await this.updateEmployee();
+                        } else {
+                            await this.addEmployee();
+                        }
+                    }
+                },
+                async addEmployee() {
+                    var formData = new FormData();
+                    formData.append('name', this.employeeName);
+                    try {
+                        const response = await fetch('http://localhost:3000/api/employees', {
+                            method: 'POST',
+                            body: formData,
+                        });
+
+                        if (response.ok) {
+                            console.log('Employee added successfully');
+                            this.fetchData();
+                            this.employeeName = '';
+                        } else {
+                            console.error('Error adding employee');
+                        }
+                    } catch (error) {
+                        console.error('Error adding employee:', error);
+                    }
+                },
+                async updateEmployee() {
+                    var formData = new FormData();
+                    formData.append('name', this.editedEmployeeName);
+                    console.log(this.editedEmployeeName);
+                    try {
+                        const response = await fetch(`http://localhost:3000/api/employees/${this.editEmployeeId}`, {
+                            method: 'PUT',
+                            body: formData,
+                        });
+
+                        if (response.ok) {
+                            console.log('Employee updated successfully');
+                            this.fetchData();
+                            this.cancelEdit();
+                        } else {
+                            console.error('Error updating employee');
+                        }
+                    } catch (error) {
+                        console.error('Error updating employee:', error);
+                    }
+                },
+                async deleteEmployee(employeeId) {
+                    try {
+                        const response = await fetch(`http://localhost:3000/api/employees/${employeeId}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response.ok) {
+                            console.log('Employee deleted successfully');
+                            this.fetchData();
+                        } else {
+                            console.error('Error deleting employee');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting employee:', error);
+                    }
+                },
+                startEdit(employeeId) {
+                    // Set the employeeId being edited
+                    this.editEmployeeId = employeeId;
+
+                    // Find the employee by ID in the employees array
+                    const employeeToEdit = this.employees.find(employee => employee.id === employeeId);
+
+                    // Set the edited employee name
+                    this.editedEmployeeName = employeeToEdit.name;
+                },
+                cancelEdit() {
+                    // Reset the editing state
+                    this.editEmployeeId = null;
+                    this.editedEmployeeName = '';
+                }
+            },
+        });
+    </script>
+
+</body>
+
+</html>

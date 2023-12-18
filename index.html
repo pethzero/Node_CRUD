@@ -18,24 +18,37 @@
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
+                    <th>Address</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="employee in employees" :key="employee.id">
+                <tr v-for="employee in datafetch" :key="employee.id">
                     <td>{{ employee.id }}</td>
                     <td>
                         <!-- Use v-if to conditionally display input or employee name -->
-                        <template v-if="employee.id !== editEmployeeId">
+                        <template v-if="employee.id !== tableID">
                             {{ employee.name }}
                         </template>
                         <template v-else>
-                            <input v-model="editedEmployeeName" class="form-control" required>
+                            <input v-model="inputTableName" class="form-control" required>
                         </template>
                     </td>
+
+                    <td>
+                        <!-- Display employee address -->
+                        <!-- {{ employee.address }} -->
+                        <template v-if="employee.id !== tableID">
+                            {{ employee.address }}
+                        </template>
+                        <template v-else>
+                            <input v-model="inputTableAddress" class="form-control" required>
+                        </template>
+                    </td>
+
                     <td>
                         <!-- Use v-if to conditionally display buttons based on editing status -->
-                        <template v-if="employee.id !== editEmployeeId">
+                        <template v-if="employee.id !== tableID">
                             <button class="btn btn-warning btn-sm" @click="startEdit(employee.id)">Edit</button>
                             <button class="btn btn-danger btn-sm" @click="deleteEmployee(employee.id)">Delete</button>
                         </template>
@@ -49,11 +62,17 @@
         </table>
 
         <h2>Add/Edit Employee</h2>
+
         <form @submit.prevent="submitForm">
             <div class="mb-3">
-                <label for="employeeName" class="form-label">Name</label>
-                <input type="text" class="form-control" v-model="employeeName" required>
+                <label for="inputDataName" class="form-label">Name</label>
+                <input type="text" class="form-control" v-model="inputDataName" required>
             </div>
+            <div class="mb-3">
+                <label for="inputDataAddress" class="form-label">Address</label>
+                <input type="text" class="form-control" v-model="inputDataAddress" required>
+            </div>
+
             <button type="submit" class="btn btn-primary">Save</button>
         </form>
     </div>
@@ -68,10 +87,13 @@
         new Vue({
             el: '#app',
             data: {
-                employees: [],
-                employeeName: '',
-                editEmployeeId: null,
-                editedEmployeeName: '',
+                apidata: [],
+                datafetch: [],
+                inputDataName: '',
+                inputDataAddress: '', // Added address field
+                tableID: null,
+                inputTableName: '',
+                inputTableAddress: '',
             },
             mounted() {
                 this.fetchData();
@@ -79,15 +101,20 @@
             methods: {
                 async fetchData() {
                     try {
-                        const response = await fetch('http://localhost:3000/api/employees');
-                        this.employees = await response.json();
+                        // แสดงตัวอย่างการเข้ารหัส SQL Query
+                        let sqlquery = "SQL0000";
+                        const encodedQuery = 'sqlquery=' + sqlquery;
+                        const response = await fetch(`http://localhost:3000/api/get?${encodedQuery}`);
+                        this.datafetch = await response.json();
+
+                        console.log(this.datafetch);
                     } catch (error) {
                         console.error('Error fetching data:', error);
                     }
                 },
                 async submitForm() {
-                    if (this.employeeName) {
-                        if (this.editEmployeeId !== null) {
+                    if (this.inputDataName) {
+                        if (this.tableID !== null) {
                             await this.updateEmployee();
                         } else {
                             await this.addEmployee();
@@ -96,17 +123,25 @@
                 },
                 async addEmployee() {
                     var formData = new FormData();
-                    formData.append('name', this.employeeName);
+
+                    apidata = [{
+                        name: this.inputDataName,
+                        address: this.inputDataAddress
+                    }]
+                    formData.append('sqlquery', 'SQL0001');
+                    formData.append('apidata', JSON.stringify(apidata));
                     try {
-                        const response = await fetch('http://localhost:3000/api/employees', {
+                        const response = await fetch('http://localhost:3000/api/post', {
                             method: 'POST',
                             body: formData,
                         });
 
                         if (response.ok) {
+                            console.log(await response.json())
                             console.log('Employee added successfully');
                             this.fetchData();
-                            this.employeeName = '';
+                            this.inputDataName = '';
+                            this.inputDataAddress = '';
                         } else {
                             console.error('Error adding employee');
                         }
@@ -116,10 +151,17 @@
                 },
                 async updateEmployee() {
                     var formData = new FormData();
-                    formData.append('name', this.editedEmployeeName);
-                    console.log(this.editedEmployeeName);
+                    apidata = [{
+                        id: this.tableID,
+                        name: this.inputTableName,
+                        address: this.inputTableAddress
+                    }]
+                    console.log(apidata)
+                    formData.append('sqlquery', 'SQL0002');
+                    formData.append('apidata', JSON.stringify(apidata));
+                    // formData.append('name', this.inputTableName);
                     try {
-                        const response = await fetch(`http://localhost:3000/api/employees/${this.editEmployeeId}`, {
+                        const response = await fetch(`http://localhost:3000/api/put/${this.tableID}`, {
                             method: 'PUT',
                             body: formData,
                         });
@@ -135,12 +177,14 @@
                         console.error('Error updating employee:', error);
                     }
                 },
-                async deleteEmployee(employeeId) {
+                async deleteEmployee(dataID) {
                     try {
-                        const response = await fetch(`http://localhost:3000/api/employees/${employeeId}`, {
+                        let sqlquery = "SQL0003";
+                        const encodedQuery = 'sqlquery=' + sqlquery;
+
+                        const response = await fetch(`http://localhost:3000/api/delete/${dataID}?${encodedQuery}`, {
                             method: 'DELETE'
                         });
-
                         if (response.ok) {
                             console.log('Employee deleted successfully');
                             this.fetchData();
@@ -151,20 +195,42 @@
                         console.error('Error deleting employee:', error);
                     }
                 },
-                startEdit(employeeId) {
-                    // Set the employeeId being edited
-                    this.editEmployeeId = employeeId;
+                // async deleteEmployee(dataID) {
+                //     try {
+                //         console.log(dataID)
+                //         var formData = new FormData();
+                //         apidata = [{
+                //             id: dataID,
+                //         }]
+                //         console.log(apidata)
+                //         formData.append('sqlquery', 'SQL0003');
+                //         formData.append('apidata', JSON.stringify(apidata));
+                //         const response = await fetch(`http://localhost:3000/api/delete/${dataID}`, {
+                //             method: 'DELETE',
+                //             body: formData,
+                //         });
 
-                    // Find the employee by ID in the employees array
-                    const employeeToEdit = this.employees.find(employee => employee.id === employeeId);
-
-                    // Set the edited employee name
-                    this.editedEmployeeName = employeeToEdit.name;
+                //         if (response.ok) {
+                //             console.log('Employee deleted successfully');
+                //             this.fetchData();
+                //         } else {
+                //             console.error('Error deleting employee');
+                //         }
+                //     } catch (error) {
+                //         console.error('Error deleting employee:', error);
+                //     }
+                // },
+                startEdit(dataID) {
+                    this.tableID = dataID;
+                    const TableEdit = this.datafetch.find(employee => employee.id === dataID);
+                    this.inputTableName = TableEdit.name;
+                    this.inputTableAddress = TableEdit.address;
                 },
                 cancelEdit() {
                     // Reset the editing state
-                    this.editEmployeeId = null;
-                    this.editedEmployeeName = '';
+                    this.tableID = null;
+                    this.inputTableName = '';
+                    this.inputTableAddress = '';
                 }
             },
         });
