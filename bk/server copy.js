@@ -5,9 +5,8 @@ const cors = require('cors');
 const multer = require('multer');
 
 const app = express();
-// app.use(express.json({ encoding: 'utf-8' }));
 const port = 3000;
-
+const ProcessHandler = require('../process');
 ///////////////////// UPDATE LOG 16/12/2566 /////////////////////
 app.use((req, res, next) => {
   // เพิ่ม headers ตามที่ต้องการ
@@ -34,7 +33,6 @@ app.use((req, res, next) => {
 
 ////////////////////////////////////////
 /////////////////////////////////////////////////
-
 // MySQL connection
 const db = mysql.createConnection({
   host: 'localhost',
@@ -46,7 +44,6 @@ const db = mysql.createConnection({
 
 // Configure multer to handle FormData
 const upload = multer();
-
 
 db.connect((err) => {
   if (err) {
@@ -64,74 +61,27 @@ app.use(cors());
 app.use(bodyParser.json({ encoding: 'utf-8' }));
 app.use(bodyParser.urlencoded({ extended: true, encoding: 'utf-8' }));
 
-
-
-/////////////////////////// GET /////////////////////////////////////
-// Routes
+const processHandler = new ProcessHandler(db);
+///////////////////////////////GET/////////////////////////////////////
 app.get('/api/get', (req, res) => {
-  db.query('SELECT * FROM employees', (err, results) => {
-    if (err) {
-      console.error('Error executing query:', err);
-      res.status(500).send('Internal Server Error');
-    } else {
-      res.json(results);
-    }
-  });
+  processHandler.handleGetRequest(req, res);
 });
-/////////////////////////////////////////////////////////////////////
-// Routes
+///////////////////////////////POST/////////////////////////////////////
 app.post('/api/post', upload.none(), (req, res) => {
-    const name = req.body.name;
+  console.log(typeof req.body)
+  console.log(req.body)
+  processHandler.handlePostRequest(req, res);
+});
 
-    db.query('INSERT INTO employees (name) VALUES (?)', [name], (err, result) => {
-      if (err) {
-        console.error('Error executing query:', err);
-        res.status(500).send('Internal Server Error');
-      } else {
-        res.json({ id: result.insertId, name: name });
-      }
-    });
-  });
-  
-
+///////////////////////////////PUT/////////////////////////////////////
 app.put('/api/put/:id', upload.none(), (req, res) => {
-  const id = req.params.id;
-  const name = req.body.name;
-  console.log('update'+name)
-  db.query('UPDATE employees SET name = ? WHERE id = ?', [name, id], (err) => {
-    if (err) {
-      console.error('Error executing query:', err);
-      res.status(500).send('Internal Server Error');
-    } else {
-      res.json({ id: id, name: name });
-    }
-  });
+  processHandler.handleUpdateRequest(req, res);
 });
 
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////DELETE/////////////////////////////////////
 app.delete('/api/delete/:id', (req, res) => {
-  const id = req.params.id;
-
-  db.query('DELETE FROM employees WHERE id = ?', [id], (err) => {
-    if (err) {
-      console.error('Error executing query:', err);
-      res.status(500).send('Internal Server Error');
-    } else {
-      res.status(204).send(); // ส่ง Status Code 204 (No Content) แทนการส่งข้อมูล
-    }
-  });
+  processHandler.handleDeleteRequest(req, res);
 });
-
-///////////////////////////////////////////////////////////////////////////
-function ProcessGetQuery() {
-    const sqlQuery = 'INSERT INTO employees (code, name) VALUES (?, ?)';
-    return sqlQuery;
-}
-
-function ProcessValueQuery(code, data) {
-    const values = [code, name];
-    return values;
-}
 
 ///////////////////////////////////////////////////////////////////////////
 // Start the server
