@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const multer = require('multer');
 const app = express();
-const port = process.env.PORT;
+
 const ProcessHandler = require('./process');
 require('dotenv').config();
 
@@ -73,7 +73,43 @@ app.delete('/api/delete/:id', (req, res) => {
   processHandler.handleDeleteRequest(req, res);
 });
 
+
+app.post('/api/employees', upload.none(), (req, res) => {
+  processHandler.handlePostRequestMutiple(req, res); 
+  // const apidata = req.body.apidata;
+
+  // try {
+  //   const parsedData = JSON.parse(apidata);
+
+  //   if (!Array.isArray(parsedData) || parsedData.length === 0) {
+  //     return res.status(400).send('Invalid or empty data');
+  //   }
+
+  //   const queries = parsedData.map(({ name, address }) => {
+  //     // สร้าง query สำหรับแต่ละรายการ
+  //     const query = 'INSERT INTO employees (name, address) VALUES (?, ?)';
+  //     const values = [name, address];
+  //     return { query, values };
+  //   });
+  //   console.log(queries);
+  //   res.send('All data inserted successfully.');
+  //   // ทำ Transaction โดยใช้ executeQueryWithTransactionMultiple
+  //   // executeQueryWithTransactionMultiple(queries)
+  //   //   .then((results) => {
+  //   //     res.json(results);
+  //   //   })
+  //   //   .catch((error) => {
+  //   //     console.error('Error during transaction:', error);
+  //   //     res.status(500).send('Rollback');
+  //   //   });
+  // } catch (error) {
+  //   console.error('Error parsing JSON:', error);
+  //   res.status(400).send('Invalid JSON format');
+  // }
+});
+
 // Start the server
+const port = process.env.PORT;
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });

@@ -35,9 +35,34 @@ class SystemSql {
             }
     
         }   
-
         return sqlValues;
     }
+
+
+    static processValueQueryMultiple(code, data, status) {
+        const sqlValuesArray = [];
+        const valueKeys = SystemSql.DBValues[code];
+      
+        if (valueKeys) {
+          let parsedDataArray;
+      
+          if (status) {
+            parsedDataArray = JSON.parse(data);
+          } else {
+            parsedDataArray = data;
+          }
+      
+          if (Array.isArray(parsedDataArray) && parsedDataArray.length > 0) {
+            parsedDataArray.forEach(parsedData => {
+              const sqlValues = valueKeys.map(key => parsedData[key]);
+              sqlValuesArray.push(sqlValues);
+            });
+          }
+        }
+      
+        return sqlValuesArray;
+      }
+      
 }
 
 module.exports = SystemSql;

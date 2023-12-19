@@ -123,19 +123,6 @@ app.delete('/api/employees/:id', (req, res) => {
   });
 });
 
-// app.delete('/api/employees/:id', (req, res) => {
-//   const id = req.params.id;
-
-//   db.query('DELETE FROM employees WHERE id = ?', [id], (err) => {
-//     if (err) {
-//       console.error('Error executing query:', err);
-//       res.status(500).send('Internal Server Error');
-//     } else {
-//       res.json({ id: id });
-//     }
-//   });
-// });
-
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
