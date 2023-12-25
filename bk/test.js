@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const multer = require('multer');
 
+const ProcessHandler = require('./process');
 const app = express();
 // app.use(express.json({ encoding: 'utf-8' }));
 const port = 3000;
@@ -65,19 +66,33 @@ app.use(bodyParser.json({ encoding: 'utf-8' }));
 app.use(bodyParser.urlencoded({ extended: true, encoding: 'utf-8' }));
 
 
+const processHandler = new ProcessHandler(db);
 
 /////////////////////////// GET /////////////////////////////////////
 // Routes
-app.get('/api/employees', (req, res) => {
-  db.query('SELECT * FROM employees', (err, results) => {
-    if (err) {
-      console.error('Error executing query:', err);
-      res.status(500).send('Internal Server Error');
-    } else {
-      res.json(results);
-    }
-  });
-});
+// app.get('/api/employees', (req, res) => {
+//   db.query('SELECT * FROM employees', (err, results) => {
+//     if (err) {
+//       console.error('Error executing query:', err);
+//       res.status(500).send('Internal Server Error');
+//     } else {
+//       res.json(results);
+//     }
+//   });
+// });
+
+/////////////////////////////  POST   /////////////////////////////////////
+// app.post('/api/employees', upload.none(), (req, res) => {
+//     const name = req.body.name;
+//     db.query('INSERT INTO employees (name) VALUES (?)', [name], (err, result) => {
+//       if (err) {
+//         console.error('Error executing query:', err);
+//         res.status(500).send('Internal Server Error');
+//       } else {
+//         res.json({ id: result.insertId, name: name });
+//       }
+//     });
+//   });
 /////////////////////////////////////////////////////////////////////
 // Routes
 // ตัวอย่างการใช้ Transaction ใน Node.js กับ MySQL
@@ -166,72 +181,80 @@ app.get('/api/employees', (req, res) => {
 //     });
 //   });
 // });
-
-// app.post('/api/employees', upload.none(), (req, res) => {
-//     const name = req.body.name;
-//     db.query('INSERT INTO employees (name) VALUES (?)', [name], (err, result) => {
-//       if (err) {
-//         console.error('Error executing query:', err);
-//         res.status(500).send('Internal Server Error');
-//       } else {
-//         res.json({ id: result.insertId, name: name });
-//       }
-//     });
-//   });
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 app.post('/api/employees', upload.none(), (req, res) => {
-  // เริ่ม Transaction
-  db.beginTransaction((err) => {
-    if (err) {
-      console.error('Error beginning transaction:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    const apidata = req.body.apidata;
-    parsedData = JSON.parse(apidata);
-
-    if (!Array.isArray(parsedData) || parsedData.length === 0) {
-      // ตรวจสอบว่า apidata ไม่ใช่ array หรือเป็น array ที่มีข้อมูล
-      return res.status(400).send('Invalid or empty data');
-    }
-    // console.log(JSON.parse(apidata))
-
-    // ทำการ query ภายใน Transaction โดยใช้ Promise.all เพื่อทำ transaction ทั้งหมดใน array
-    Promise.all(parsedData.map(({ name,address }) => {
-      return new Promise((resolve, reject) => {
-        db.query('INSERT INTO employees (name,address) VALUES (?,?)', [name,address], (err, result) => {
-          if (err) {
-            console.error('Error executing query:', err);
-            reject(err);
-          } else {
-            resolve(result);
-          }
-        });
-      });
-    }))
-    .then((results) => {
-      // Commit Transaction หากทุกรายการสำเร็จ
-      db.commit((err) => {
-        if (err) {
-          console.error('Error committing transaction:', err);
-          return db.rollback(() => {
-            res.status(500).send('Internal Server Error');
-          });
-        }
-        // ส่ง response หลังจาก Commit สำเร็จ
-        const responseData = results.map(result => ({ id: result.insertId }));
-        res.json(responseData);
-      });
-    })
-    .catch((error) => {
-      // ถ้ามี error ใน query ใน Transaction ทำ Rollback
-      db.rollback(() => {
-        console.error('Error during transaction:', error);
-        res.status(500).send('Rollback');
-      });
+    // const apidata = req.body.apidata;
+    // console.log(apidata);
+    // parsedData = JSON.parse(apidata);
+    // console.log(parsedData);
+  processHandler.handleRequestProcess(req, res);
     });
-  });
-});
+////////////////////////////////////  Mutiple Promise  /////////////////////////////////////////////
+// app.post('/api/employees', upload.none(), (req, res) => {
+//   // เริ่ม Transaction
+//   const apidata = req.body.apidata;
+//   console.log(apidata);
+//   parsedData = JSON.parse(apidata);
+//   console.log(parsedData);
+
+//   // ดึงค่า query จาก parsedData
+//   const Sqlquery = parsedData[0].jsondata[0].query;
+//   console.log(Sqlquery);
+
+//   const Sqlvalue = parsedData[0].jsondata[0].value;
+//   console.log(Sqlvalue);
+//   res.json("suscess");
+//   // db.beginTransaction((err) => {
+//   //   if (err) {
+//   //     console.error('Error beginning transaction:', err);
+//   //     return res.status(500).send('Internal Server Error');
+//   //   }
+
+//   //   const apidata = req.body.apidata;
+//   //   parsedData = JSON.parse(apidata);
+
+//   //   if (!Array.isArray(parsedData) || parsedData.length === 0) {
+//   //     // ตรวจสอบว่า apidata ไม่ใช่ array หรือเป็น array ที่มีข้อมูล
+//   //     return res.status(400).send('Invalid or empty data');
+//   //   }
+//   //   // console.log(JSON.parse(apidata))
+
+//   //   // ทำการ query ภายใน Transaction โดยใช้ Promise.all เพื่อทำ transaction ทั้งหมดใน array
+//   //   Promise.all(parsedData.map(({ name,address }) => {
+//   //     return new Promise((resolve, reject) => {
+//   //       db.query('INSERT INTO employees (name,address) VALUES (?,?)', [name,address], (err, result) => {
+//   //         if (err) {
+//   //           console.error('Error executing query:', err);
+//   //           reject(err);
+//   //         } else {
+//   //           resolve(result);
+//   //         }
+//   //       });
+//   //     });
+//   //   }))
+//   //   .then((results) => {
+//   //     // Commit Transaction หากทุกรายการสำเร็จ
+//   //     db.commit((err) => {
+//   //       if (err) {
+//   //         console.error('Error committing transaction:', err);
+//   //         return db.rollback(() => {
+//   //           res.status(500).send('Internal Server Error');
+//   //         });
+//   //       }
+//   //       // ส่ง response หลังจาก Commit สำเร็จ
+//   //       const responseData = results.map(result => ({ id: result.insertId }));
+//   //       res.json(responseData);
+//   //     });
+//   //   })
+//   //   .catch((error) => {
+//   //     // ถ้ามี error ใน query ใน Transaction ทำ Rollback
+//   //     db.rollback(() => {
+//   //       console.error('Error during transaction:', error);
+//   //       res.status(500).send('Rollback');
+//   //     });
+//   //   });
+//   // });
+// });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 

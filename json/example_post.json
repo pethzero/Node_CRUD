@@ -1,0 +1,18 @@
+[
+    {
+        "query": "SQL0001",
+        "datatable": [
+            {"name": "A", "score": 10},
+            {"name": "B", "score": 55}
+        ],
+        "condition": "MCQ0001"
+    },
+    {
+        "query": "SQL0004",
+        "datatable": [
+            {"grade": "C"},
+            {"grade": "D"}
+        ],
+        "condition": "MCQ0004"
+    }
+]

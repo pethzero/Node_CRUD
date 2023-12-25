@@ -18,7 +18,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
-                    <th>Address</th>
+                    <th>Score</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -36,13 +36,13 @@
                     </td>
 
                     <td>
-                        <!-- Display employee address -->
-                        <!-- {{ employee.address }} -->
+                        <!-- Display employee score -->
+                        <!-- {{ employee.score }} -->
                         <template v-if="employee.id !== tableID">
-                            {{ employee.address }}
+                            {{ employee.score }}
                         </template>
                         <template v-else>
-                            <input v-model="inputTableAddress" class="form-control" required>
+                            <input v-model="inputTableScore" class="form-control" required>
                         </template>
                     </td>
 
@@ -60,20 +60,38 @@
                 </tr>
             </tbody>
         </table>
-
         <h2>Add/Edit Employee</h2>
 
-        <form @submit.prevent="submitForm">
+        <form @submit.prevent="submitEmployeeForm">
             <div class="mb-3">
                 <label for="inputDataName" class="form-label">Name</label>
                 <input type="text" class="form-control" v-model="inputDataName" required>
             </div>
             <div class="mb-3">
-                <label for="inputDataAddress" class="form-label">Address</label>
-                <input type="text" class="form-control" v-model="inputDataAddress" required>
+                <label for="inputDataScore" class="form-label">score</label>
+                <input type="number" class="form-control" v-model="inputDataScore" required>
             </div>
 
-            <button type="submit" class="btn btn-primary">Save</button>
+            <hr>
+            <button type="submit" class="btn btn-primary">Save Employee</button>
+        </form>
+        <hr>
+
+        <h2>Upload File</h2>
+        <form @submit.prevent="submitFileForm">
+            <div class="mb-3">
+                <label for="fileInput" class="form-label">Upload File</label>
+                <input type="file" id="fileInput" @change="handleFileChange" class="form-control"
+                    accept=".jpg, .jpeg, .png" />
+            </div>
+            <button type="submit" class="btn btn-primary">Save Upload</button>
+        </form>
+
+
+        <h2>Upload FileMutiple</h2>
+        <form @submit.prevent="submitFileMutipleForm">
+           
+            <button type="submit" class="btn btn-primary">Save Upload</button>
         </form>
     </div>
 
@@ -90,29 +108,17 @@
                 apidata: [],
                 datafetch: [],
                 inputDataName: '',
-                inputDataAddress: '', // Added address field
+                inputDataScore: 0, // Added score field
                 tableID: null,
                 inputTableName: '',
-                inputTableAddress: '',
+                inputTableScore: 0,
+                fileToUpload: null,
             },
             mounted() {
                 this.fetchData();
             },
             methods: {
-                async fetchData() {
-                    try {
-                        // แสดงตัวอย่างการเข้ารหัส SQL Query
-                        let sqlquery = "SQL0000";
-                        const encodedQuery = 'sqlquery=' + sqlquery;
-                        const response = await fetch(`http://localhost:3000/api/get?${encodedQuery}`);
-                        this.datafetch = await response.json();
-
-                        console.log(this.datafetch);
-                    } catch (error) {
-                        console.error('Error fetching data:', error);
-                    }
-                },
-                async submitForm() {
+                async submitEmployeeForm() {
                     if (this.inputDataName) {
                         if (this.tableID !== null) {
                             await this.updateEmployee();
@@ -121,12 +127,64 @@
                         }
                     }
                 },
+                async submitFileForm() {
+                    // ตรวจสอบว่ามีไฟล์ที่เลือกหรือไม่
+                    if (true) {
+                    // if (this.fileToUpload) {
+                        // สร้าง FormData เพื่อรับไฟล์
+                        const formData = new FormData();
+                        formData.append('filedata', this.fileToUpload);
+
+                        // เรียกใช้งาน API อัพโหลดไฟล์
+                        this.addUpload(formData);
+                    }
+                },
+                handleFileChange(event) {
+                    // ดึงข้อมูลไฟล์ที่ถูกเลือก
+                    const file = event.target.files[0];
+                    this.fileToUpload = file;
+
+                },
+                async addUpload(formData) {
+                    try {
+                        const response = await fetch('http://localhost:3000/api/upload', {
+                            method: 'POST',
+                            body: formData,
+                        });
+
+                        if (response.ok) {
+                            console.log('File uploaded successfully');
+                            this.fetchData(); // เรียกเมธอดเพื่อโหลดข้อมูลใหม่
+                            this.fileToUpload = null;
+
+                            // ล้างค่าใน input file
+                            document.getElementById('fileInput').value = '';
+                        } else {
+                            this.fileToUpload = null;
+                            console.error('Error uploading file');
+                        }
+                    } catch (error) {
+                        console.error('Error uploading file:', error);
+                    }
+                },
+                async fetchData() {
+                    try {
+                        // แสดงตัวอย่างการเข้ารหัส SQL Query
+                        let sqlquery = "SQL0000";
+                        const encodedQuery = 'sqlquery=' + sqlquery;
+                        const response = await fetch(`http://localhost:3000/api/get?${encodedQuery}`);
+                        this.datafetch = await response.json();
+                        // console.log(this.datafetch);
+                    } catch (error) {
+                        console.error('Error fetching data:', error);
+                    }
+                },
                 async addEmployee() {
                     var formData = new FormData();
 
                     apidata = [{
                         name: this.inputDataName,
-                        address: this.inputDataAddress
+                        score: this.inputDataScore
                     }]
                     formData.append('sqlquery', 'SQL0001');
                     formData.append('apidata', JSON.stringify(apidata));
@@ -141,7 +199,7 @@
                             console.log('Employee added successfully');
                             this.fetchData();
                             this.inputDataName = '';
-                            this.inputDataAddress = '';
+                            this.inputDataScore = 0;
                         } else {
                             console.error('Error adding employee');
                         }
@@ -154,7 +212,7 @@
                     apidata = [{
                         id: this.tableID,
                         name: this.inputTableName,
-                        address: this.inputTableAddress
+                        score: this.inputTableScore
                     }]
                     console.log(apidata)
                     formData.append('sqlquery', 'SQL0002');
@@ -195,42 +253,17 @@
                         console.error('Error deleting employee:', error);
                     }
                 },
-                // async deleteEmployee(dataID) {
-                //     try {
-                //         console.log(dataID)
-                //         var formData = new FormData();
-                //         apidata = [{
-                //             id: dataID,
-                //         }]
-                //         console.log(apidata)
-                //         formData.append('sqlquery', 'SQL0003');
-                //         formData.append('apidata', JSON.stringify(apidata));
-                //         const response = await fetch(`http://localhost:3000/api/delete/${dataID}`, {
-                //             method: 'DELETE',
-                //             body: formData,
-                //         });
-
-                //         if (response.ok) {
-                //             console.log('Employee deleted successfully');
-                //             this.fetchData();
-                //         } else {
-                //             console.error('Error deleting employee');
-                //         }
-                //     } catch (error) {
-                //         console.error('Error deleting employee:', error);
-                //     }
-                // },
                 startEdit(dataID) {
                     this.tableID = dataID;
                     const TableEdit = this.datafetch.find(employee => employee.id === dataID);
                     this.inputTableName = TableEdit.name;
-                    this.inputTableAddress = TableEdit.address;
+                    this.inputTableScore = TableEdit.score;
                 },
                 cancelEdit() {
                     // Reset the editing state
                     this.tableID = null;
                     this.inputTableName = '';
-                    this.inputTableAddress = '';
+                    this.inputTableScore = 0;
                 }
             },
         });

@@ -6,3 +6,8 @@ example.txt
 
 # Ignore all .log files
 *.log
+
+# Ignore images and exe files
+*.jpg
+*.png
+*.exe

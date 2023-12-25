@@ -1,0 +1,375 @@
+{
+	"info": {
+		"_postman_id": "5d408707-aa9c-482e-9427-98c5cd822155",
+		"name": "NODEJS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18079087"
+	},
+	"item": [
+		{
+			"name": "OldServer",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/employees",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST Augular + Node JS",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "apidata",
+							"value": "[{ \"name\": \"A\" }, { \"name\": \"B\" }]",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/employees",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/post?name=พรี่โยช",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "โยช xx",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/put/38",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"put",
+						"38"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/delete/38",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/delete/38",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"delete",
+						"38"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GETSERVER",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/get?sqlquery=SQL0000",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"get"
+					],
+					"query": [
+						{
+							"key": "sqlquery",
+							"value": "SQL0000"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PostServer",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "sqlquery",
+							"value": "SQL0001",
+							"type": "text"
+						},
+						{
+							"key": "apidata",
+							"value": "[{\"name\": \"John\", \"address\": \"123 Main St\"}]",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/post",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PostServerMutiple",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "sqlquery",
+							"value": "SQL0001",
+							"type": "text"
+						},
+						{
+							"key": "apidata",
+							"value": "[{ \"name\": \"A\" ,\"address\":\"10\"}, { \"name\": \"B\",\"address\":\"55\" }]",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/employees",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PostServerMutipleV2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "apidata",
+							"value": "[\n    {\n        \"query\": \"SQL0001\",\n        \"datatable\": [\n            {\"name\": \"A\", \"score\": 10},\n            {\"name\": \"B\", \"score\": 55}\n        ],\n        \"condition\": \"MCQ0001\"\n    },\n    {\n        \"query\": \"SQL0004\",\n        \"datatable\": [\n            {\"grade\": \"C\"},\n            {\"grade\": \"D\"}\n        ],\n        \"condition\": \"MCQ0004\"\n    }\n]",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/postmutiple",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"postmutiple"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PutServerMutipleV2",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "apidata",
+							"value": "[\n    {\n        \"query\": \"SQL0002\",\n        \"datatable\": [\n            {\"name\": \"Thanadol\", \"score\": 100,\"id\":1},\n            {\"name\": \"Chawa\", \"score\": 79,\"id\":2}\n        ],\n        \"condition\": \"put\"\n    },\n    {\n        \"query\": \"SQL0005\",\n        \"datatable\": [\n            {\"grade\": \"A\",\"id\":1},\n            {\"grade\": \"B\",\"id\":2}\n        ],\n        \"condition\": \"put\"\n    }\n]",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/postmutiple/99999",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"postmutiple",
+						"99999"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "filedata",
+							"type": "file",
+							"src": "/C:/Users/pethzero/Downloads/S__10551299.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/upload",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"upload"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "uploadmutiple",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "files",
+							"type": "file",
+							"src": [
+								"/C:/Users/pethzero/Downloads/S__10551299.jpg",
+								"/C:/Users/pethzero/Downloads/S__14647384.jpg",
+								"/C:/Users/pethzero/Downloads/S__10526758.jpg",
+								"/C:/Users/pethzero/Downloads/S__10551299.jpg",
+								"/C:/Users/pethzero/Downloads/S__10551300.jpg"
+							]
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/uploadmutiple",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"uploadmutiple"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "uploadfields",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "fileX",
+							"type": "file",
+							"src": "/C:/Users/pethzero/Downloads/S__14647384.jpg"
+						},
+						{
+							"key": "fileY",
+							"type": "file",
+							"src": "/C:/Users/pethzero/Downloads/equipment_1 (3).jpg"
+						},
+						{
+							"key": "fileZ",
+							"type": "file",
+							"src": "/C:/Users/pethzero/Downloads/LogoIndustrialLogic-Final (2).png"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/uploadarray",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"uploadarray"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
