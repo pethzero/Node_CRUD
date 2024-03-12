@@ -9,6 +9,7 @@ class SystemSql {
     'SQL0003': 'DELETE FROM employees WHERE id = ?',
     'SQL0004': 'INSERT INTO employees (grade) VALUES (?)', // New SQL query
     'SQL0005': 'UPDATE employees SET grade = ? WHERE id = ?',
+    'SQLM_0001': 'INSERT INTO employees (name, score) VALUES ?', // New SQL query
   };
 
   static DBValues = {
@@ -18,6 +19,7 @@ class SystemSql {
     'SQL0004': ['grade'], // Corresponding values for the new SQL query
     'SQL0005': ['grade', 'id'], // Corresponding values for the new SQL query
     ////////////////////////////////////////////////////////////////////
+    'MCQ0000': [],
     'MCQ0001': ['name', 'score'],
     'MCQ0002': ['name', 'score', 'id'],
     'MCQ0003': ['id'],
@@ -28,6 +30,8 @@ class SystemSql {
   static sqlsearch(code) {
     return SystemSql.DBQueries[code] || '';
   }
+
+
 
 
   static processValueQueryArray(code, condition, data, status) {
@@ -46,7 +50,6 @@ class SystemSql {
 
   static generateQueriesAndValues(data) {
     const queriesAndValues = [];
-
     data.forEach(item => {
       const code = item.query;
       const processedValues = SystemSql.processValueQueryArray(code, item.condition, item.listdata, true);
@@ -54,7 +57,7 @@ class SystemSql {
     });
     return queriesAndValues;
   }
-  
+
   static processValueQuery(code, data, status) {
     let sqlValues = [];
     let parsedData;
@@ -97,8 +100,6 @@ class SystemSql {
     return sqlValuesArray;
   }
   ////////////////////////////// PROCESS NEW /////////////////////////////////////
-
-
   static async upload(file) {
     try {
       const newPath = path.join(file.destination, file.originalname);
@@ -142,33 +143,6 @@ class SystemSql {
     }
   }
 
-
-  // static async processUploadFields(req) {
-  //   try {
-  //     const filesX = req.files['fileX'];
-  //     const filesY = req.files['fileY'];
-  //     const results = [];
-
-  //     if (filesX) {
-  //       for (const file of filesX) {
-  //         const result = await this.upload(file);
-  //         results.push(result);
-  //       }
-  //     }
-
-  //     if (filesY) {
-  //       for (const file of filesY) {
-  //         const result = await this.upload(file);
-  //         results.push(result);
-  //       }
-  //     }
-
-  //     return results;
-  //   } catch (error) {
-  //     throw new Error('Internal Server Error');
-  //   }
-  // }
-
   static async processUploadFields(req) {
     try {
       const fileResults = [];
@@ -193,6 +167,33 @@ class SystemSql {
 
 
   ///////////////////////////////////////////////////////////////////////////////
+  // 16/02/24
+  static ReworkProcessVQA(code, condition, data, status) {
+    const sqlValuesArray = [];
+    const sqlValues = [];
+    const valueKeys = SystemSql.DBValues[condition];
+    if (valueKeys)
+    {
+      if (Array.isArray(data) && data.length > 0)
+      {
+        data.forEach(item => {
+           sqlValues.push(valueKeys.map(key => item[key]));
+        });
+      }
+      sqlValuesArray.push({ query: SystemSql.DBQueries[code], values: sqlValues });
+    }
+    return sqlValuesArray;
+  }
+
+  static GenerateQuery_M(data) {
+    const queriesAndValues = [];
+    data.forEach(item => {
+      const processedValues = SystemSql.ReworkProcessVQA(item.query, item.condition, item.listdata, true);
+      queriesAndValues.push(...processedValues);
+    });
+    return queriesAndValues;
+  }
+
 }
 
 module.exports = SystemSql;

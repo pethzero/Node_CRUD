@@ -1,10 +1,13 @@
 
 // process.js
 const SystemSql = require('./systemsql');
-class ProcessHandler {
+class ProcessHandler 
+  {
     constructor(db) {
         this.db = db;
     }
+    
+    
     //////////////////////////////////////////////    OLD  /////////////////////////////////////////////////////////////////
     async handleGetRequest(req, res) {
         try {
@@ -102,7 +105,65 @@ class ProcessHandler {
                 }
                 try {
                     ////////////////////// execute //////////////////////
-                    await this.executeWithTransactionNew(queriesAndValues);
+                    // console.log(queriesAndValues);
+                    const result_data = await this.exeCommitDB(queriesAndValues); 
+                    console.log(result_data)
+                    ////////////////////////////////////////////////////
+                    this.db.commit((err) => {
+                        if (err) {
+                            this.db.rollback(() => {
+                                res.status(500).json({r_result:result_data, status: 'Error', message: 'Transaction Commit Error', error: err });
+                            });
+                        } else {
+                            res.json({ r_result:result_data,status: 'Suscess', message: 'Transaction Committed Successfully' })
+                        }
+                    });
+                } catch (error) {
+                    this.db.rollback(() => {
+                        res.status(500).json({ status: 'Error', message: 'Error during transaction', error: error });
+                    });
+                }
+            });
+
+        } catch (error) {
+            console.error('Error handling post request:', error);
+            res.status(500).send('Internal Server Error');
+        }
+    }
+    /////////////////////////////////////////////    PROCESS V.2   ////////////////////////////////////////////////////////////
+    // 19/01/2567
+    async handleRequestProcessV2(req, res) {
+        try {
+            const DataJson = req.body.apidata; // ดึงข้อมูลตามที่ส่งมา โดย Key apidata
+            const parsedData = JSON.parse(DataJson);
+            console.log(parsedData)
+            const queriesAndValues = SystemSql.generateQueriesAndValues(parsedData);
+
+            this.db.beginTransaction(async (err) => {
+                if (err) {
+                    return res.status(500).json({ status: 'Error', message: 'Transaction Begin Error', error: err });
+                }
+                try {
+                    ////////////////////// execute //////////////////////
+                    parsedData.forEach(item => {
+                        // ทำสิ่งที่คุณต้องการกับแต่ละ data ที่ได้จาก array
+                        const process_method = item.method;
+                        // console.log("process_method",process_method);
+                        switch (process_method) {
+                            case "GET":
+                                console.log(item)
+                                // console.log(SystemSql.generateQueriesAndValues(item))
+                                // code block
+                                break;
+                            case y:
+                                // code block
+                                break;
+                            default:
+                            // code block
+                        }
+                    });
+
+
                     ////////////////////////////////////////////////////
                     this.db.commit((err) => {
                         if (err) {
@@ -111,6 +172,69 @@ class ProcessHandler {
                             });
                         } else {
                             res.json({ status: 'Suscess', message: 'Transaction Committed Successfully' })
+                        }
+                    });
+                } catch (error) {
+                    this.db.rollback(() => {
+                        res.status(500).json({ status: 'Error', message: 'Error during transaction', error: error });
+                    });
+                }
+
+            });
+
+        } catch (error) {
+            console.error('Error handling post request:', error);
+            res.status(500).send('Internal Server Error');
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    async handleRequestProcess_M(req, res) {
+        try {
+            var data_result;
+            const DataJson = req.body.apidata; // ดึงข้อมูลตามที่ส่งมา โดย Key apidata
+            const parsedData = JSON.parse(DataJson);
+            //const queriesAndValues = SystemSql.generateQueriesAndValues(parsedData);
+            const queriesAndValues = SystemSql.GenerateQuery_M(parsedData);
+            this.db.beginTransaction(async (err) => {
+                if (err) {
+                    return res.status(500).json({ status: 'Error', message: 'Transaction Begin Error', error: err });
+                }
+                try {
+                    ////////////////////// execute //////////////////////
+                    console.log("DATA" + queriesAndValues);
+                    // // const queries =
+                    // //     [
+                    // //         {
+                    // //             query: "INSERT INTO employees (name, score) VALUES (?,?)",
+                    // //             values: ["A", 10]
+                    // //         }
+                    // //     ];
+
+                    // // await this.exeCommitDB(queries); /// มีแผนเปลี่ยนใหม่
+
+                    const queries =
+                        [
+                            {
+                                // query: "INSERT INTO employees (name, score) VALUES ?",
+                                query: "UPDATE employees SET grade = ? WHERE id = ?",
+                                // values: ['A', 15]
+                                values: [['A', 15],['B',16]]
+                                    
+                            }
+                        ];
+                    // const result_data = await this.exeCommitDB(queries); 
+                    const result_data = await this.exeCommitDB_M(queries); 
+                    
+                    console.log(result_data);
+                    // console.log("DATA"+queriesAndValues);
+                    ////////////////////////////////////////////////////
+                    this.db.commit((err) => {
+                        if (err) {
+                            this.db.rollback(() => {
+                                res.status(500).json({result:result_data, status: 'Error', message: 'Transaction Commit Error', error: err });
+                            });
+                        } else {
+                            res.json({ result:result_data,status: 'Suscess', message: 'Transaction Committed Successfully' })
                         }
                     });
                 } catch (error) {
@@ -244,7 +368,9 @@ class ProcessHandler {
             });
         });
     }
-    executeWithTransactionNew(queriesAndValues) {
+
+    ///////////////////// (Process ใหม่) /////////////////////
+    exeCommitDB(queriesAndValues) {
         return new Promise((resolve, reject) => {
 
             const performQuery = (query, values) => {
@@ -264,13 +390,44 @@ class ProcessHandler {
             });
 
             Promise.all(promises)
-                .then(() => {
-                    resolve();
+                .then((result) => {
+                    resolve(result);
                 })
                 .catch((error) => {
                     reject(error);
                 });
         });
     }
+
+    ////////////////////////////////////////////////////////////
+    exeCommitDB_M(queriesAndValues) {
+        return new Promise((resolve, reject) => {
+
+            const performQuery = (query, values) => {
+                return new Promise((queryResolve, queryReject) => {
+                    this.db.query(query, [values], (err, result) => {
+                        if (err) {
+                            queryReject(err);
+                        } else {
+                            queryResolve(result);
+                        }
+                    });
+                });
+            };
+
+            const promises = queriesAndValues.map(({ query, values }) => {
+                return performQuery(query, values);
+            });
+
+            Promise.all(promises)
+                .then((results) => {
+                    resolve(results);
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        });
+    }
+
 }
 module.exports = ProcessHandler;

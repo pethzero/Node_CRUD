@@ -68,7 +68,7 @@ app.use(bodyParser.urlencoded({ extended: true, encoding: 'utf-8' }));
 
 /////////////////////////// GET /////////////////////////////////////
 // Routes
-app.get('/api/employees', (req, res) => {
+app.get('/api/bom', (req, res) => {
   
   db.query('SELECT * FROM employees', (err, results) => {
     if (err) {

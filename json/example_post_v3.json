@@ -1,0 +1,10 @@
+[
+    {
+        "query": "SQL0001",
+        "listdata": [
+            {"name": "A", "score": 10},
+            {"name": "B", "score": 55}
+        ],
+        "condition": "MCQ0001"
+    }
+]
