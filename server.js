@@ -55,7 +55,128 @@ app.use(bodyParser.json({ encoding: 'utf-8' }));
 app.use(bodyParser.urlencoded({ extended: true, encoding: 'utf-8' }));
 
 const processHandler = new ProcessHandler(db);
-////////////////////////////////// OLD RROCOESS /////////////////////////////////
+//////////////////////////////////////////////////////////////// OLD RROCOESS ////////////////////////////////////////////////////////////////
+////////////////////
+///// Student /////
+///////////////////
+///// GET /////
+app.get('/api/students', (req, res) => {
+  db.query('SELECT * FROM students', (err, results) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      res.json(results);
+    }
+  });
+});
+///// POST /////
+app.post('/api/students', upload.none(), (req, res) => {
+  const data = req.body;
+  db.query('INSERT INTO students (name,detail) VALUES (?,?)', [data.name,data.detail], (err, result) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      res.json({ id: result.insertId, name: data.name,detail:data.detail});
+    }
+  });
+});
+///// PUT /////
+app.put('/api/students/:id/', upload.none(), (req, res) => {
+  const id = req.params.id;
+  const data = req.body;
+  db.query('UPDATE students SET name = ?,detail = ? WHERE id = ?', [data.name,data.detail, id], (err) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      res.json({ id: id, name: data.name,detail:data.detail });
+    }
+  });
+});
+
+///// PATCH /////
+app.patch('/api/students/:id/', upload.none(), (req, res) => {
+  const id = req.params.id;
+  const data = req.body;
+  db.query('UPDATE students SET ? WHERE id = ?', [data, id], (err) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      res.json({ id: id, ...data });
+    }
+  });
+});
+
+
+///// DELETE /////
+app.delete('/api/students/:id/', (req, res) => {
+  const id = req.params.id;
+  db.query('DELETE FROM students WHERE id = ?', [id], (err) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      res.json({ message:'Delete Susccessfully',id: id});
+      // res.status(204).send(); // ส่ง Status Code 204 (No Content) แทนการส่งข้อมูล
+    }
+  });
+});
+///////////////
+
+
+/////////////////////////// GET /////////////////////////////////////
+app.get('/api/employees', (req, res) => {
+  db.query('SELECT * FROM employees', (err, results) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      res.json(results);
+    }
+  });
+});
+app.post('/api/employees', upload.none(), (req, res) => {
+    const name = req.body.name;
+    // console.log(req.body.name)
+    db.query('INSERT INTO employees (name) VALUES (?)', [name], (err, result) => {
+      if (err) {
+        console.error('Error executing query:', err);
+        res.status(500).send('Internal Server Error');
+      } else {
+        res.json({ id: result.insertId, name: name });
+      }
+    });
+  });
+
+app.put('/api/employees/:id', upload.none(), (req, res) => {
+  const id = req.params.id;
+  const name = req.body.name;
+  console.log('update'+name)
+  db.query('UPDATE employees SET name = ? WHERE id = ?', [name, id], (err) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      res.json({ id: id, name: name });
+    }
+  });
+});
+app.delete('/api/employees/:id', (req, res) => {
+  const id = req.params.id;
+  db.query('DELETE FROM employees WHERE id = ?', [id], (err) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      res.status(204).send(); // ส่ง Status Code 204 (No Content) แทนการส่งข้อมูล
+    }
+  });
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // GET endpoint
 app.get('/api/get', (req, res) => {
   processHandler.handleGetRequest(req, res);
