@@ -8,7 +8,7 @@ const dbConfig = {
     password: process.env.MYSQL_DB_PASSWORD || '1234',
     database: process.env.MYSQL_DB_DATABASE || '',
     port: process.env.MYSQL_DB_PORT || 3306,
-    type: 'mysql'
+    type: 'mysql'  // ชนิดฐานข้อมูล
   },
   db_maria: {
     host: process.env.MARIADB_DB_HOST || 'localhost',
@@ -16,7 +16,7 @@ const dbConfig = {
     password: process.env.MARIADB_DB_PASSWORD || '1234',
     database: process.env.MARIADB_DB_DATABASE || '',
     port: process.env.MARIADB_DB_PORT || 33061,
-    type: 'mariadb'
+    type: 'mariadb'  // ชนิดฐานข้อมูล
   },
   api_postgres: {
     host: process.env.POSTGRES_DB_HOST || 'localhost',
@@ -24,7 +24,7 @@ const dbConfig = {
     password: process.env.POSTGRES_DB_PASSWORD || '1234',
     database: process.env.POSTGRES_DB_DATABASE || '',
     port: process.env.POSTGRES_DB_PORT || 5432,
-    type: 'postgres'
+    type: 'postgres'  // ชนิดฐานข้อมูล
   }
 };
 
